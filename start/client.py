@@ -1,4 +1,5 @@
 import socket
+<<<<<<< HEAD
 import os
 from sys import exit as sys_exit
 from colorama import Fore
@@ -111,6 +112,101 @@ class Start:
 if __name__ == '__main__':
     client = Start()
     client.run()
+=======
+from time import sleep
+import os
+from sys import exit as sys_exit
+
+
+def connection():
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        client.connect(('localhost', 5006))
+    except ConnectionError:
+        client.connect(('supersite.ddnsking.com', 5006))
+    print('Подключено!\n', client)
+
+    try:
+        while True:
+            command = input('>>>')
+
+            if command == 'cmd':
+                print('^^^CMD^^^')
+                commands = command + ' '
+                command = input('cmd>')
+                while command != 'close':
+                    commands += command + '\n'
+                    command = input('cmd>')
+                print(commands)
+                client.send(commands.encode('cp1125'))
+
+                full_size = int(client.recv(1024).decode('cp1125'))
+                receive_size = 0
+                output = ''
+                while receive_size < full_size:
+                    data = client.recv(1024)
+                    output += data.decode('cp1125')
+                    receive_size += len(data)
+                    print(len(data))
+                print(output)
+
+                if 'tree' in command:
+                    # cmd tree /f
+                    with open('cmd_tree.txt', 'w', encoding='utf-8') as file:
+                        file.write(output)
+                continue
+
+            data = command.encode('cp1125')
+            client.send(data)
+            if command == 'stop':
+                data = client.recv(1024)
+                print(data.decode('cp1125'))
+                continue
+            elif command == 'start':
+                data = client.recv(1024)
+                print(data.decode('cp1125'))
+                continue
+            elif command == 'exit':
+                client.close()
+                sys_exit(1)
+
+            elif len(command.split()) > 1:
+                print(command + '1fawe')
+                f = command.split()[0]
+                command = command[len(f) + 1:]
+
+                if f == 'file':
+                    print('Start send file')
+                    # VID_20221105_153542.mp4
+                    with open(r'to_load\\' + command, 'rb') as file:
+                        file_size = os.path.getsize(r'to_load\\' + command)
+                        print(file_size)
+                        client.send(str(file_size).encode('cp1125'))
+                        client.recv(1)
+                        send_size = 0
+                        data = ''
+                        while data != b'':
+                            data = file.read(1024)
+                            client.send(data)
+                            send_size += len(data)
+                            print(f'\rSend: {round(100 / (file_size / send_size), 2)} %', end='')
+                        print(client.recv(1024).decode('cp1125'))
+                elif f == 'del':
+                    data = client.recv(1024)
+                    print(data.decode('cp1125'))
+
+    except Exception as ex:
+        client.close()
+        print('Ошибка в обработке данных:\n', ex)
+    finally:
+        client.close()
+        print('Подключение завершено\n')
+
+
+if __name__ == '__main__':
+    connection()
+    # print(len(f"{'f'*1025}".encode('cp1125')))
+>>>>>>> 0af4711 (first2)
 
     '''#commands = ['tree', '/f', 'C:/Users/79212/PycharmProjects/myserver/']
     commands = ''
